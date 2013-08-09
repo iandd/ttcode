@@ -514,7 +514,7 @@ c         CALL GASCOOL
             OMROT = 2.d0*PI/(period_ramp*DAY)
             IF(((III-1)/(IREA/10))*(IREA/10).eq.(III-1).and.
      $           myid.eq.0) THEN
-               write(*,'(A,2(1x,e12.6),1x,I8)') 
+               write(*,'(A,2(1x,e13.6),1x,I8)') 
      $              'rotation ramp %=',period_ramp,OMROT,III
             ENDIF
          endif
@@ -529,7 +529,7 @@ c            Fbottom = Fbot - (Fbot-Fbot_final)*flux_ramp
 
             IF(((III-1)/(IREA/10))*(IREA/10).eq.(III-1).and.
      $        myid.eq.0) THEN
-               write(*,'(A,2(1x,e12.6),1x,I8)') 
+               write(*,'(A,2(1x,e13.6),1x,I8)') 
      $              'interior flux ramp %=',flux_ramp,Fbottom,III
             ENDIF
          endif
@@ -601,7 +601,7 @@ c            CALL CHECK_MAX_DT
          IF(MODTYP.EQ.3) THEN
             IF(MOD(num_iter,1000).EQ.0) THEN
                call CALCGAPMASS
-               if(myid.eq.0) write(20,'(I8,1x,3(1x,e12.6))') 
+               if(myid.eq.0) write(20,'(I8,1x,3(1x,e13.6))') 
      %              num_iter,zeit,Maccreated,Mgap
             ENDIF
          ENDIF
@@ -622,9 +622,9 @@ c     %        MOD(num_iter,100).EQ.0) THEN
          IF(MODTYP.EQ.2.and.modver.eq.4.and.planet_num.eq.5.and.
      $        MOD(num_iter,100).EQ.0) THEN
             if(myid.eq.0) then
-               write(40,'(I8,1x,2(1x,e12.6))') 
+               write(40,'(I8,1x,2(1x,e13.6))') 
      %              num_iter,zeit,Mtransfer
-               write(*,'(A,I8,1x,2(1x,e12.6))') 'III,time,Mtransfer',
+               write(*,'(A,I8,1x,2(1x,e13.6))') 'III,time,Mtransfer',
      %              num_iter,zeit,Mtransfer
 !--   rezero mtransfer
             endif

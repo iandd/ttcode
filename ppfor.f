@@ -280,8 +280,8 @@ c               endif
 
 !--- DAMP VELOCITIES
       IF(VELDAMP.GT.0.d0) 
-     $     CALL VELOCITYDAMPING(III,hydrotime,locNX,locNY,locNZ,
-     $     VH,GH,HH)
+     $     CALL VELOCITYDAMPING(VH,GH,HH)
+     $     
 
 
 **  reSet T=T(old) 
@@ -720,7 +720,7 @@ c                     endif
          MPLANET = MSOL*MSTAR2
          if(myid.eq.0) then
             print *,'igravity=4'
-            write(*,'(A,e12.6)') '   mplanet=',mplanet
+            write(*,'(A,e13.6)') '   mplanet=',mplanet
          endif
          if(ncosys.eq.1) then
             DO K=-1,locNZ+2
@@ -796,7 +796,7 @@ c                     endif
             
             IF(((III-1)/(IREA/10))*(IREA/10).eq.(III-1).and.
      $           myid.eq.0) THEN
-               write(*,'(A,4(1x,e12.6))') 
+               write(*,'(A,4(1x,e13.6))') 
      $              ' Primary Mass Ramp =',hydrotime/DAY,mstar1_ramp,
      $              mstar1_init/mstar1,mstar1
             ENDIF
@@ -849,7 +849,7 @@ c-linear in log10 space
 c         gravx = init_gravx - (init_gravx-final_gravx)*grav_ramp
          IF(((III-1)/(IREA/10))*(IREA/10).eq.(III-1).and.
      $        myid.eq.0) THEN
-            write(*,'(A,2(1x,e12.6),1x,I10)') 
+            write(*,'(A,2(1x,e13.6),1x,I10)') 
      $           'gravitational ramp %=',grav_ramp,gravx(1,1,1),III
          ENDIF        
          gravy=0.d0

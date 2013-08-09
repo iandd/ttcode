@@ -178,27 +178,35 @@ c         endif
       RETURN
       END SUBROUTINE CALCMUSTAR
 
-      SUBROUTINE VELOCITYDAMPING(III,hydrotime,locNX,locNY,locNZ,
-     $     VINT,GINT,HINT)
+      SUBROUTINE VELOCITYDAMPING(VINT,GINT,HINT)
 **  Uniformily damps velocity
       USE input_init
       USE mpi_var_init
       USE global_constants
+      USE fluid_var_init
+      USE grid_var_init
       IMPLICIT NONE
-      integer :: i,j,k,III,locNX,locNY,locNZ
+      integer :: i,j,k
       DOUBLE PRECISION :: VINT(locNX,locNY,locNZ)
       DOUBLE PRECISION :: GINT(locNX,locNY,locNZ)
       DOUBLE PRECISION :: HINT(locNX,locNY,locNZ)
-      DOUBLE PRECISION :: velramp,hydrotime,veldamp_start,DAMP_TIME
+      DOUBLE PRECISION :: velramp,veldamp_start,DAMP_TIME
+      double precision :: eta_sponge_start,sponge_coeff,eta_sponge,Rw
       IF(VELDAMP.LT.1.d0) THEN
 !----- ala Burrket
          VELRAMP = VELDAMP
+         VINT=VELRAMP*VINT
+         GINT=VELRAMP*GINT
+         HINT=VELRAMP*HINT
       ELSEIF(VELDAMP.GE.1.d0.and.VELDAMP.LT.2.d0) THEN
 !-----RAMP-DOWN DAMPING (From VELDAMP to 1.0)
          VELRAMP = (1.d0-(VELDAMP-1.d0))*(1.d0*III/
      $        (1.d0*DAMP_STEPS))+(VELDAMP-1.d0)
 c         velramp  = velramp + 0.307
          if(velramp.ge.1.0) velramp = 1.d0
+         VINT=VELRAMP*VINT
+         GINT=VELRAMP*GINT
+         HINT=VELRAMP*HINT
       ELSEIF(VELDAMP.GE.2.d0.and.VELDAMP.LT.3.d0) THEN
 !-----RAMP-DOWN DAMPING (From VELDAMP to 1.0) USING HYDROTIME
          veldamp_start = 0.d0*DAY
@@ -210,10 +218,26 @@ c         velramp  = velramp + 0.307
          else
             velramp=0.d0
          ENDIF
+         VINT=VELRAMP*VINT
+         GINT=VELRAMP*GINT
+         HINT=VELRAMP*HINT
+      ELSEIF(VELDAMP.EQ.4.d0) then
+!-----SPONGE LAYER AT THE TOP ON RADIAL VELOCITY
+         eta_sponge_start = 0.80
+         sponge_coeff = 1.0
+         do k=1,locNZ
+            do j=1,locNY
+               do i=1,upperbnd(j,k)
+                  eta_sponge = (xxa(i)-xxa(1))/
+     $                 (xxa(upperbnd(j,k))-xxa(1))
+                  Rw = sponge_coeff*(sin((eta_sponge-eta_sponge_start)/
+     $                 (1.d0-eta_sponge_start)))**2.d0
+                  VINT(i,j,k)=VINT(i,j,k)/(1.d0+Rw*DELT)
+               enddo
+            enddo
+         enddo
+
       ENDIF
-      VINT=VELRAMP*VINT
-      GINT=VELRAMP*GINT
-      HINT=VELRAMP*HINT
       IF (((III-1)/(IREA/10))*(IREA/10).eq.(III-1)) THEN
          if(myid.eq.0) print *,'velramp=',velramp
       ENDIF
@@ -663,7 +687,7 @@ c         print *,'DE',oldetot,global_etot,deletot
          call MPI_ALLREDUCE(localDT,checkDT,1,MPI_DOUBLE_PRECISION,
      %        MPI_MIN,MPI_COMM_WORLD,ierr)
          
-         write(*,'(A,I8,5(1x,e12.6))') 
+         write(*,'(A,I8,5(1x,e13.6))') 
      &        'timestep check',myid,min_Vdt*FDELT,min_Gdt*FDELT,
      &        min_Hdt*FDELT,min_viscdt*FDELT,checkDT
 
