@@ -224,21 +224,29 @@ c         velramp  = velramp + 0.307
       ELSEIF(VELDAMP.EQ.4.d0) then
 !-----SPONGE LAYER AT THE TOP ON RADIAL VELOCITY
          eta_sponge_start = 0.80
-         sponge_coeff = 1.0
+         sponge_coeff = 0.8
          do k=1,locNZ
             do j=1,locNY
                do i=1,upperbnd(j,k)
                   eta_sponge = (xxa(i)-xxa(1))/
      $                 (xxa(upperbnd(j,k))-xxa(1))
-                  Rw = sponge_coeff*(sin((eta_sponge-eta_sponge_start)/
-     $                 (1.d0-eta_sponge_start)))**2.d0
-                  VINT(i,j,k)=VINT(i,j,k)/(1.d0+Rw*DELT)
+                  if(eta_sponge.gt.eta_sponge_start) then
+                     Rw=sponge_coeff*(sin((eta_sponge-eta_sponge_start)/
+     $                    (1.d0-eta_sponge_start)))**2.d0
+c                     if(myid.eq.0.and.III.eq.3.and.j.eq.locNY/2.and.
+c     $                    k.eq.locNZ/2) then
+c                        write(*,'(A,2(1x,I8),4(1x,e13.6))') 'SPONGE',
+c     $                       i,upperbnd(j,k),eta_sponge,Rw,
+c     $                       VINT(i,j,k),VINT(i,j,k)/(1.d0+Rw*DELT)
+c                     endif
+                     VINT(i,j,k)=VINT(i,j,k)/(1.d0+Rw*DELT)
+                  endif
                enddo
             enddo
          enddo
 
       ENDIF
-      IF (((III-1)/(IREA/10))*(IREA/10).eq.(III-1)) THEN
+      if(veldamp.ne.4.and.((III-1)/(IREA/10))*(IREA/10).eq.(III-1)) THEN
          if(myid.eq.0) print *,'velramp=',velramp
       ENDIF
       RETURN

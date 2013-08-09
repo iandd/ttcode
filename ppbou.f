@@ -1364,10 +1364,6 @@ c                        TJupHeat = Tjupheat*irr_ramp
                   ENDIF
                   T(upperbnd(j,k),j,k) = TJupHeat
 
-!-does this get rid of the spikes at upperbnd?
-                  V(upperbnd(j,k),j,k)=
-     $                 0.99*max(V(upperbnd(j,k),j,k),0.d0)
-
                   DO I=upperbnd(j,k)+1,locNX+2
                      T(I,J,K)=TJupHeat
 !-try putting this back.. is it causing the random spikes
